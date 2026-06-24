@@ -1,0 +1,1984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Autonova | Automation for Real Businesses</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-dark: #0d0d0d;
+      --bg-card: #141414;
+      --bg-lighter: #1a1a1a;
+      --gold-primary: #C9922A;
+      --gold-light: #D4A843;
+      --gold-glow: rgba(201, 146, 42, 0.4);
+      --text-primary: #F0EDE8;
+      --text-muted: #9A9590;
+      --font-body: 'Inter', sans-serif;
+      --font-heading: 'DM Serif Display', serif;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--bg-dark);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Noise texture overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      opacity: 0.03;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(5deg); }
+    }
+
+    @keyframes floatReverse {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-15px) rotate(-3deg); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.05); }
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes blobMove {
+      0% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(30px, -50px) scale(1.1); }
+      66% { transform: translate(-20px, 20px) scale(0.9); }
+      100% { transform: translate(0, 0) scale(1); }
+    }
+
+    @keyframes shimmer {
+      0% { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+
+    @keyframes breathe {
+      0%, 100% { box-shadow: 0 0 20px rgba(201, 146, 42, 0.2); }
+      50% { box-shadow: 0 0 40px rgba(201, 146, 42, 0.4); }
+    }
+
+    @keyframes drawLine {
+      from { width: 0; }
+      to { width: 100%; }
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes countUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-on-scroll {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .animate-on-scroll.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Staggered animations for children */
+    .stagger-children .animate-on-scroll:nth-child(1) { transition-delay: 0s; }
+    .stagger-children .animate-on-scroll:nth-child(2) { transition-delay: 0.1s; }
+    .stagger-children .animate-on-scroll:nth-child(3) { transition-delay: 0.2s; }
+    .stagger-children .animate-on-scroll:nth-child(4) { transition-delay: 0.3s; }
+    .stagger-children .animate-on-scroll:nth-child(5) { transition-delay: 0.4s; }
+    .stagger-children .animate-on-scroll:nth-child(6) { transition-delay: 0.5s; }
+    .stagger-children .animate-on-scroll:nth-child(7) { transition-delay: 0.6s; }
+    .stagger-children .animate-on-scroll:nth-child(8) { transition-delay: 0.7s; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .animate-on-scroll {
+        opacity: 1;
+        transform: none;
+        transition: none;
+      }
+      @keyframes float, @keyframes blobMove, @keyframes pulse, @keyframes gradientShift {
+        0%, 100% { transform: none; }
+      }
+    }
+
+    /* Navigation */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 1.25rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .nav.scrolled {
+      background: rgba(13, 13, 13, 0.75);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      padding: 1rem 2rem;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .nav-logo {
+      font-family: var(--font-heading);
+      font-size: 1.6rem;
+      color: var(--text-primary);
+      text-decoration: none;
+      letter-spacing: 0.02em;
+      position: relative;
+      transition: color 0.3s ease;
+    }
+
+    .nav-logo::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--gold-primary), var(--gold-light));
+      transition: width 0.3s ease;
+    }
+
+    .nav-logo:hover::after {
+      width: 100%;
+    }
+
+    .nav-cta {
+      background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
+      color: var(--bg-dark);
+      padding: 0.8rem 1.75rem;
+      border: none;
+      border-radius: 8px;
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      text-decoration: none;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(201, 146, 42, 0.25);
+    }
+
+    .nav-cta::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .nav-cta:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(201, 146, 42, 0.4);
+    }
+
+    .nav-cta:hover::before {
+      left: 100%;
+    }
+
+    /* Hero Section */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 7rem 2rem 5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Animated gradient blobs */
+    .hero-blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.4;
+      pointer-events: none;
+      will-change: transform;
+    }
+
+    .blob-1 {
+      width: 500px;
+      height: 500px;
+      background: linear-gradient(135deg, var(--gold-primary), rgba(201, 146, 42, 0.3));
+      top: -10%;
+      right: -10%;
+      animation: blobMove 20s ease-in-out infinite;
+    }
+
+    .blob-2 {
+      width: 400px;
+      height: 400px;
+      background: linear-gradient(135deg, rgba(212, 168, 67, 0.5), rgba(201, 146, 42, 0.2));
+      bottom: 10%;
+      left: -5%;
+      animation: blobMove 25s ease-in-out infinite reverse;
+      animation-delay: -5s;
+    }
+
+    .blob-3 {
+      width: 300px;
+      height: 300px;
+      background: linear-gradient(135deg, rgba(201, 146, 42, 0.3), rgba(212, 168, 67, 0.4));
+      top: 40%;
+      left: 50%;
+      transform: translateX(-50%);
+      animation: blobMove 18s ease-in-out infinite;
+      animation-delay: -10s;
+    }
+
+    /* Floating geometric shapes */
+    .geo-shape {
+      position: absolute;
+      pointer-events: none;
+      opacity: 0.08;
+      will-change: transform;
+    }
+
+    .shape-1 {
+      width: 80px;
+      height: 80px;
+      border: 2px solid var(--gold-light);
+      top: 15%;
+      left: 10%;
+      animation: float 8s ease-in-out infinite;
+      transform: rotate(45deg);
+    }
+
+    .shape-2 {
+      width: 60px;
+      height: 60px;
+      border: 2px solid var(--gold-light);
+      border-radius: 50%;
+      bottom: 20%;
+      right: 15%;
+      animation: floatReverse 10s ease-in-out infinite;
+    }
+
+    .shape-3 {
+      width: 0;
+      height: 0;
+      border-left: 30px solid transparent;
+      border-right: 30px solid transparent;
+      border-bottom: 50px solid var(--gold-primary);
+      top: 30%;
+      right: 20%;
+      animation: float 12s ease-in-out infinite;
+      animation-delay: -3s;
+      opacity: 0.06;
+    }
+
+    .shape-4 {
+      width: 40px;
+      height: 40px;
+      background: transparent;
+      border: 2px solid var(--gold-light);
+      bottom: 35%;
+      left: 15%;
+      animation: floatReverse 9s ease-in-out infinite;
+    }
+
+    /* Background grid */
+    .hero::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image:
+        linear-gradient(rgba(201, 146, 42, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201, 146, 42, 0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      mask-image: radial-gradient(ellipse at center, black 0%, transparent 70%);
+      -webkit-mask-image: radial-gradient(ellipse at center, black 0%, transparent 70%);
+    }
+
+    .hero-content {
+      max-width: 900px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero h1 {
+      font-family: var(--font-heading);
+      font-size: clamp(2.4rem, 5.5vw, 4.5rem);
+      font-weight: 400;
+      line-height: 1.12;
+      margin-bottom: 1.75rem;
+      color: var(--text-primary);
+      position: relative;
+    }
+
+    /* Gradient text highlight effect */
+    .hero h1 .highlight {
+      background: linear-gradient(135deg, var(--gold-light), var(--gold-primary), var(--gold-light));
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: gradientShift 4s ease-in-out infinite;
+    }
+
+    .hero p {
+      font-size: clamp(1.05rem, 2.2vw, 1.35rem);
+      color: var(--text-muted);
+      max-width: 680px;
+      margin: 0 auto 3rem;
+      line-height: 1.75;
+    }
+
+    .hero-cta {
+      background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
+      color: var(--bg-dark);
+      padding: 1.15rem 3rem;
+      border: none;
+      border-radius: 10px;
+      font-family: var(--font-body);
+      font-size: 1.15rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      text-decoration: none;
+      display: inline-block;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 6px 25px rgba(201, 146, 42, 0.3);
+      animation: breathe 3s ease-in-out infinite;
+    }
+
+    .hero-cta::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      transition: left 0.6s ease;
+    }
+
+    .hero-cta:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 12px 40px rgba(201, 146, 42, 0.45);
+    }
+
+    .hero-cta:hover::before {
+      left: 100%;
+    }
+
+    /* Section Styles */
+    section {
+      padding: 6rem 2rem;
+      position: relative;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-heading {
+      font-family: var(--font-heading);
+      font-size: clamp(2rem, 4.5vw, 3rem);
+      font-weight: 400;
+      margin-bottom: 3.5rem;
+      text-align: center;
+      color: var(--text-primary);
+      position: relative;
+    }
+
+    /* Animated underline for section headings */
+    .section-heading::after {
+      content: '';
+      display: block;
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--gold-primary), var(--gold-light));
+      margin: 1rem auto 0;
+      border-radius: 2px;
+      transition: width 0.6s ease;
+    }
+
+    .section-heading.visible::after {
+      width: 100px;
+    }
+
+    /* Who This Is For Section */
+    .for-section {
+      background-color: var(--bg-card);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .for-section::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(201, 146, 42, 0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .for-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 3rem;
+    }
+
+    @media (min-width: 768px) {
+      .for-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 5rem;
+      }
+    }
+
+    .for-column {
+      padding: 2rem;
+      border-radius: 16px;
+      background: rgba(20, 20, 20, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .for-column::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: transparent;
+      transition: background 0.4s ease;
+    }
+
+    .for-column:hover {
+      transform: translateY(-5px);
+      background: rgba(26, 26, 26, 0.8);
+      border-color: rgba(201, 146, 42, 0.1);
+    }
+
+    .for-column.is-for::before {
+      background: linear-gradient(90deg, transparent, var(--gold-primary), transparent);
+    }
+
+    .for-column h3 {
+      font-family: var(--font-heading);
+      font-size: 1.5rem;
+      margin-bottom: 1.75rem;
+      color: var(--text-primary);
+    }
+
+    .for-column.is-for h3 {
+      color: var(--gold-light);
+    }
+
+    .for-column.not-for h3 {
+      color: var(--text-muted);
+    }
+
+    .for-list {
+      list-style: none;
+    }
+
+    .for-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+      font-size: 1rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      transition: all 0.3s ease;
+      padding: 0.5rem;
+      margin-left: -0.5rem;
+      border-radius: 8px;
+    }
+
+    .for-list li:hover {
+      color: var(--text-primary);
+      background: rgba(201, 146, 42, 0.03);
+    }
+
+    .check-icon, .x-icon {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      margin-top: 0.15rem;
+      transition: transform 0.3s ease;
+    }
+
+    .for-list li:hover .check-icon,
+    .for-list li:hover .x-icon {
+      transform: scale(1.15);
+    }
+
+    .check-icon {
+      color: var(--gold-light);
+      filter: drop-shadow(0 0 6px rgba(201, 146, 42, 0.4));
+    }
+
+    .x-icon {
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    /* How It Works Section */
+    .how-section {
+      background-color: var(--bg-dark);
+      position: relative;
+    }
+
+    .how-section::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(201, 146, 42, 0.1), transparent);
+    }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 3rem;
+      position: relative;
+    }
+
+    @media (min-width: 1024px) {
+      .steps-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 2.5rem;
+      }
+
+      .steps-grid::before {
+        content: '';
+        position: absolute;
+        top: 28px;
+        left: 12.5%;
+        right: 12.5%;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--gold-primary), var(--gold-primary), transparent);
+        opacity: 0.25;
+      }
+    }
+
+    .step {
+      text-align: center;
+      position: relative;
+      padding: 1.5rem;
+      border-radius: 12px;
+      transition: all 0.4s ease;
+    }
+
+    .step:hover {
+      background: rgba(201, 146, 42, 0.03);
+    }
+
+    .step-number {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
+      color: var(--bg-dark);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.25rem;
+      margin: 0 auto 1.5rem;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 8px 25px rgba(201, 146, 42, 0.3);
+      transition: all 0.4s ease;
+    }
+
+    .step:hover .step-number {
+      transform: scale(1.1) rotate(5deg);
+      box-shadow: 0 12px 35px rgba(201, 146, 42, 0.4);
+    }
+
+    .step-number::before {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      border: 2px solid var(--gold-primary);
+      opacity: 0;
+      transition: all 0.4s ease;
+    }
+
+    .step:hover .step-number::before {
+      opacity: 0.5;
+      inset: -6px;
+    }
+
+    .step h3 {
+      font-family: var(--font-heading);
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+      color: var(--text-primary);
+    }
+
+    .step p {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    /* Credibility Section */
+    .credibility-section {
+      background-color: var(--bg-card);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .credibility-section::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(201, 146, 42, 0.03) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .cred-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    @media (min-width: 768px) {
+      .cred-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .cred-item {
+      text-align: center;
+      padding: 2rem 1.5rem;
+      border-radius: 16px;
+      background: rgba(26, 26, 26, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .cred-item:hover {
+      transform: translateY(-8px);
+      background: rgba(26, 26, 26, 0.8);
+      border-color: rgba(201, 146, 42, 0.15);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .cred-icon {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold-light);
+      position: relative;
+      transition: all 0.4s ease;
+    }
+
+    .cred-icon::after {
+      content: '';
+      position: absolute;
+      inset: -8px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(201, 146, 42, 0.2) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .cred-item:hover .cred-icon::after {
+      opacity: 1;
+    }
+
+    .cred-item:hover .cred-icon svg {
+      transform: scale(1.1);
+    }
+
+    .cred-stat {
+      font-family: var(--font-heading);
+      font-size: 2rem;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+      transition: color 0.4s ease;
+    }
+
+    .cred-item:hover .cred-stat {
+      color: var(--gold-light);
+    }
+
+    .cred-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Checklist Section */
+    .checklist-section {
+      background-color: var(--bg-dark);
+      position: relative;
+    }
+
+    .checklist-intro {
+      text-align: center;
+      color: var(--text-muted);
+      margin-bottom: 3rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      font-size: 1.05rem;
+    }
+
+    .checklist-container {
+      max-width: 750px;
+      margin: 0 auto;
+    }
+
+    .checklist {
+      list-style: none;
+      margin-bottom: 2rem;
+    }
+
+    .checklist-item {
+      margin-bottom: 0.875rem;
+    }
+
+    .checklist-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.25rem;
+      cursor: pointer;
+      padding: 1.25rem 1.5rem;
+      background: rgba(20, 20, 20, 0.6);
+      border-radius: 12px;
+      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      border: 1px solid transparent;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .checklist-label::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(201, 146, 42, 0.05), transparent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .checklist-label:hover {
+      background: rgba(26, 26, 26, 0.8);
+      border-color: rgba(201, 146, 42, 0.15);
+      transform: translateX(6px);
+    }
+
+    .checklist-label:hover::before {
+      opacity: 1;
+    }
+
+    .checklist-label input {
+      display: none;
+    }
+
+    .custom-checkbox {
+      width: 26px;
+      height: 26px;
+      border: 2px solid rgba(201, 146, 42, 0.4);
+      border-radius: 6px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      margin-top: 0.1rem;
+      background: rgba(20, 20, 20, 0.8);
+    }
+
+    .checklist-label input:checked + .custom-checkbox {
+      background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
+      border-color: var(--gold-primary);
+      box-shadow: 0 4px 15px rgba(201, 146, 42, 0.4);
+      transform: scale(1.05);
+    }
+
+    .checklist-label input:checked + .custom-checkbox svg {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .custom-checkbox svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--bg-dark);
+      stroke-width: 3;
+      opacity: 0;
+      transition: all 0.3s ease;
+      transform: scale(0.5);
+    }
+
+    .checklist-text {
+      font-size: 1rem;
+      color: var(--text-primary);
+      line-height: 1.55;
+      position: relative;
+      z-index: 1;
+    }
+
+    .checklist-result {
+      text-align: center;
+      padding: 2rem 1.5rem;
+      background: linear-gradient(135deg, rgba(201, 146, 42, 0.08), rgba(20, 20, 20, 0.5));
+      border-radius: 16px;
+      border: 1px solid rgba(201, 146, 42, 0.15);
+      margin-bottom: 2.5rem;
+      min-height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .checklist-result::before {
+      content: '';
+      position: absolute;
+      inset: -50%;
+      background: conic-gradient(from 0deg, transparent, rgba(201, 146, 42, 0.03), transparent);
+      animation: spin 20s linear infinite;
+    }
+
+    .checklist-result p {
+      font-size: 1.1rem;
+      color: var(--text-primary);
+      line-height: 1.6;
+      position: relative;
+      z-index: 1;
+    }
+
+    .checklist-cta-wrapper {
+      text-align: center;
+    }
+
+    /* Audit Offer Section */
+    .audit-section {
+      background-color: var(--bg-card);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .audit-section::before {
+      content: '';
+      position: absolute;
+      top: -30%;
+      left: -20%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(201, 146, 42, 0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .audit-card {
+      max-width: 850px;
+      margin: 0 auto;
+      background: linear-gradient(135deg, rgba(26, 26, 26, 0.9), rgba(20, 20, 20, 0.7));
+      padding: 3.5rem 2.5rem;
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .audit-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--gold-primary), var(--gold-light), var(--gold-primary), transparent);
+    }
+
+    @media (min-width: 768px) {
+      .audit-card {
+        padding: 4.5rem 4rem;
+      }
+    }
+
+    .audit-card h2 {
+      font-family: var(--font-heading);
+      font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+      margin-bottom: 1.75rem;
+      color: var(--text-primary);
+      text-align: center;
+    }
+
+    .audit-card > p {
+      color: var(--text-muted);
+      margin-bottom: 2.5rem;
+      line-height: 1.75;
+      text-align: center;
+      max-width: 650px;
+      margin-left: auto;
+      margin-right: auto;
+      font-size: 1.05rem;
+    }
+
+    .audit-bullets {
+      list-style: none;
+      max-width: 420px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .audit-bullets li {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+      color: var(--text-primary);
+      padding: 0.75rem 1rem;
+      background: rgba(201, 146, 42, 0.03);
+      border-radius: 8px;
+      border-left: 2px solid var(--gold-primary);
+      transition: all 0.3s ease;
+    }
+
+    .audit-bullets li:hover {
+      background: rgba(201, 146, 42, 0.08);
+      transform: translateX(5px);
+    }
+
+    .audit-bullets li::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--gold-light);
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(201, 146, 42, 0.5);
+    }
+
+    .audit-cta-wrapper {
+      text-align: center;
+    }
+
+    /* What Happens Next Section */
+    .next-section {
+      background-color: var(--bg-dark);
+      position: relative;
+    }
+
+    .next-steps {
+      max-width: 750px;
+      margin: 0 auto;
+    }
+
+    .next-step {
+      display: flex;
+      gap: 2rem;
+      margin-bottom: 2.5rem;
+      padding-bottom: 2.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      position: relative;
+      transition: all 0.4s ease;
+    }
+
+    .next-step:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .next-step:hover {
+      transform: translateX(10px);
+    }
+
+    .next-step-number {
+      width: 48px;
+      height: 48px;
+      background: rgba(201, 146, 42, 0.1);
+      border: 2px solid var(--gold-primary);
+      color: var(--gold-light);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      transition: all 0.4s ease;
+      box-shadow: 0 0 20px rgba(201, 146, 42, 0.15);
+    }
+
+    .next-step:hover .next-step-number {
+      background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
+      color: var(--bg-dark);
+      transform: scale(1.1);
+      box-shadow: 0 8px 30px rgba(201, 146, 42, 0.4);
+    }
+
+    .next-step-content h3 {
+      font-family: var(--font-heading);
+      font-size: 1.3rem;
+      margin-bottom: 0.75rem;
+      color: var(--text-primary);
+    }
+
+    .next-step-content p {
+      font-size: 1rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    /* Form Section */
+    .form-section {
+      background-color: var(--bg-card);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .form-section::before {
+      content: '';
+      position: absolute;
+      bottom: -20%;
+      right: -10%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(201, 146, 42, 0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .form-container {
+      max-width: 580px;
+      margin: 0 auto;
+      background: linear-gradient(135deg, rgba(26, 26, 26, 0.95), rgba(20, 20, 20, 0.8));
+      padding: 3.5rem 2.5rem;
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(20px);
+      position: relative;
+    }
+
+    .form-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--gold-primary), var(--gold-light), var(--gold-primary), transparent);
+    }
+
+    @media (min-width: 768px) {
+      .form-container {
+        padding: 4rem 3.5rem;
+      }
+    }
+
+    .form-container h2 {
+      font-family: var(--font-heading);
+      font-size: 1.9rem;
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+      text-align: center;
+    }
+
+    .form-subheading {
+      text-align: center;
+      color: var(--text-muted);
+      margin-bottom: 2.5rem;
+      font-size: 1rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.95rem;
+      color: var(--text-primary);
+      margin-bottom: 0.6rem;
+      font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 1rem 1.25rem;
+      background: rgba(13, 13, 13, 0.8);
+      border: 2px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 1rem;
+      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--gold-primary);
+      box-shadow: 0 0 0 4px rgba(201, 146, 42, 0.15), 0 4px 20px rgba(0, 0, 0, 0.2);
+      background: rgba(13, 13, 13, 1);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    .form-submit {
+      width: 100%;
+      padding: 1.25rem;
+      background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
+      color: var(--bg-dark);
+      border: none;
+      border-radius: 10px;
+      font-family: var(--font-body);
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      margin-top: 0.75rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(201, 146, 42, 0.3);
+    }
+
+    .form-submit::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+      transition: left 0.6s ease;
+    }
+
+    .form-submit:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px rgba(201, 146, 42, 0.45);
+    }
+
+    .form-submit:hover::before {
+      left: 100%;
+    }
+
+    .form-note {
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-top: 1.25rem;
+      opacity: 0.8;
+    }
+
+    .form-success {
+      display: none;
+      text-align: center;
+      padding: 2.5rem 2rem;
+    }
+
+    .form-success.visible {
+      display: block;
+      animation: fadeInUp 0.6s ease forwards;
+    }
+
+    .form-success h3 {
+      font-family: var(--font-heading);
+      font-size: 1.6rem;
+      color: var(--gold-light);
+      margin-bottom: 1.25rem;
+    }
+
+    .form-success p {
+      color: var(--text-muted);
+      line-height: 1.7;
+      font-size: 1.05rem;
+    }
+
+    .form-fields.hidden {
+      display: none;
+    }
+
+    /* Final CTA Section */
+    .final-cta-section {
+      background: linear-gradient(135deg, rgba(26, 26, 26, 0.5), rgba(20, 20, 20, 0.8));
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .final-cta-section::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, rgba(201, 146, 42, 0.04) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .final-cta-section h2 {
+      font-family: var(--font-heading);
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      margin-bottom: 1.25rem;
+      color: var(--text-primary);
+      max-width: 750px;
+      margin-left: auto;
+      margin-right: auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .final-cta-section p {
+      color: var(--text-muted);
+      margin-bottom: 2.5rem;
+      max-width: 550px;
+      margin-left: auto;
+      margin-right: auto;
+      font-size: 1.1rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .final-cta-section .hero-cta {
+      animation: breathe 3s ease-in-out infinite;
+    }
+
+    /* Footer */
+    .footer {
+      background-color: var(--bg-dark);
+      padding: 3.5rem 2rem;
+      text-align: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
+      position: relative;
+    }
+
+    .footer-logo {
+      font-family: var(--font-heading);
+      font-size: 1.5rem;
+      color: var(--text-primary);
+      margin-bottom: 0.75rem;
+    }
+
+    .footer-tagline {
+      font-size: 1rem;
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+    }
+
+    .footer-email {
+      font-size: 0.95rem;
+      color: var(--gold-light);
+      text-decoration: none;
+      margin-bottom: 1.75rem;
+      display: inline-block;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .footer-email::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: var(--gold-light);
+      transition: width 0.3s ease;
+    }
+
+    .footer-email:hover::after {
+      width: 100%;
+    }
+
+    .footer-email:hover {
+      text-shadow: 0 0 20px rgba(201, 146, 42, 0.5);
+    }
+
+    .footer-copyright {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav" id="nav">
+    <a href="#" class="nav-logo">Autonova</a>
+    <a href="#form-section" class="nav-cta">Request an Audit</a>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-blob blob-1"></div>
+    <div class="hero-blob blob-2"></div>
+    <div class="hero-blob blob-3"></div>
+    <div class="geo-shape shape-1"></div>
+    <div class="geo-shape shape-2"></div>
+    <div class="geo-shape shape-3"></div>
+    <div class="geo-shape shape-4"></div>
+    <div class="hero-content animate-on-scroll">
+      <h1>Your business runs on <span class="highlight">manual work</span> it shouldn't have to.</h1>
+      <p>We help established businesses replace repetitive processes with reliable automations — built to fit how you actually work.</p>
+      <a href="#form-section" class="hero-cta">Request an Automation Audit</a>
+    </div>
+  </section>
+
+  <!-- Who This Is For Section -->
+  <section class="for-section" id="who-section">
+    <div class="container">
+      <h2 class="section-heading animate-on-scroll">Built for operators, not experimenters.</h2>
+      <div class="for-grid">
+        <div class="for-column is-for animate-on-scroll">
+          <h3>This is for you if...</h3>
+          <ul class="for-list">
+            <li>
+              <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>You run a real business with real operations</span>
+            </li>
+            <li>
+              <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>Your team spends time on repetitive, manual tasks</span>
+            </li>
+            <li>
+              <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>You want clarity on what automation can actually do before investing</span>
+            </li>
+            <li>
+              <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>You're tired of disconnected tools that don't talk to each other</span>
+            </li>
+          </ul>
+        </div>
+        <div class="for-column not-for animate-on-scroll">
+          <h3>This isn't for you if...</h3>
+          <ul class="for-list">
+            <li>
+              <svg class="x-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+              <span>You're looking for a magic button that fixes everything</span>
+            </li>
+            <li>
+              <svg class="x-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+              <span>You're running a hobby project or early experiment</span>
+            </li>
+            <li>
+              <svg class="x-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+              <span>You expect results without process or change</span>
+            </li>
+            <li>
+              <svg class="x-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+              <span>You want a vendor, not a thinking partner</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section class="how-section" id="how-section">
+    <div class="container">
+      <h2 class="section-heading animate-on-scroll">How It Works</h2>
+      <div class="steps-grid stagger-children">
+        <div class="step animate-on-scroll">
+          <div class="step-number">1</div>
+          <h3>Understand your current system</h3>
+          <p>We map how work actually moves through your business today.</p>
+        </div>
+        <div class="step animate-on-scroll">
+          <div class="step-number">2</div>
+          <h3>Find the friction</h3>
+          <p>We identify where time is lost, where errors happen, and where handoffs break down.</p>
+        </div>
+        <div class="step animate-on-scroll">
+          <div class="step-number">3</div>
+          <h3>Design practical automations</h3>
+          <p>We propose solutions that fit your existing tools and team — no rip-and-replace.</p>
+        </div>
+        <div class="step animate-on-scroll">
+          <div class="step-number">4</div>
+          <h3>Decide together</h3>
+          <p>You get a clear picture of what's possible. What happens next is entirely your call.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Credibility Section -->
+  <section class="credibility-section" id="credibility-section">
+    <div class="container">
+      <h2 class="section-heading animate-on-scroll">Why Work With Us</h2>
+      <div class="cred-grid stagger-children">
+        <div class="cred-item animate-on-scroll">
+          <div class="cred-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
+          <div class="cred-stat" data-count="8" data-suffix="+">8+</div>
+          <div class="cred-desc">Years working with operational systems and data</div>
+        </div>
+        <div class="cred-item animate-on-scroll">
+          <div class="cred-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+              <path d="M2 17l10 5 10-5"></path>
+              <path d="M2 12l10 5 10-5"></path>
+            </svg>
+          </div>
+          <div class="cred-stat" data-count="40" data-suffix="+">40+</div>
+          <div class="cred-desc">Automations running in production</div>
+        </div>
+        <div class="cred-item animate-on-scroll">
+          <div class="cred-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            </svg>
+          </div>
+          <div class="cred-stat" data-count="6" data-suffix="+">6+</div>
+          <div class="cred-desc">Industries across diverse business sectors</div>
+        </div>
+        <div class="cred-item animate-on-scroll">
+          <div class="cred-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            </svg>
+          </div>
+          <div class="cred-stat">100%</div>
+          <div class="cred-desc">Engagements start with listening</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Self-Assessment Checklist Section -->
+  <section class="checklist-section" id="checklist-section">
+    <div class="container">
+      <h2 class="section-heading animate-on-scroll">Is your business ready for automation?</h2>
+      <p class="checklist-intro animate-on-scroll">Check any that apply. There are no wrong answers — this is just a starting point.</p>
+      <div class="checklist-container animate-on-scroll">
+        <ul class="checklist stagger-children">
+          <li class="checklist-item">
+            <label class="checklist-label">
+              <input type="checkbox" name="checklist" value="1">
+              <span class="custom-checkbox">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </span>
+              <span class="checklist-text">We have at least one process we do the same way every week</span>
+            </label>
+          </li>
+          <li class="checklist-item">
+            <label class="checklist-label">
+              <input type="checkbox" name="checklist" value="2">
+              <span class="custom-checkbox">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </span>
+              <span class="checklist-text">Someone on our team spends hours on data entry or copy-paste tasks</span>
+            </label>
+          </li>
+          <li class="checklist-item">
+            <label class="checklist-label">
+              <input type="checkbox" name="checklist" value="3">
+              <span class="custom-checkbox">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </span>
+              <span class="checklist-text">We use more than 3 software tools that don't connect well</span>
+            </label>
+          </li>
+          <li class="checklist-item">
+            <label class="checklist-label">
+              <input type="checkbox" name="checklist" value="4">
+              <span class="custom-checkbox">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </span>
+              <span class="checklist-text">We've had errors caused by manual handoffs or miscommunication</span>
+            </label>
+          </li>
+          <li class="checklist-item">
+            <label class="checklist-label">
+              <input type="checkbox" name="checklist" value="5">
+              <span class="custom-checkbox">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </span>
+              <span class="checklist-text">We've talked about automating something but never acted on it</span>
+            </label>
+          </li>
+          <li class="checklist-item">
+            <label class="checklist-label">
+              <input type="checkbox" name="checklist" value="6">
+              <span class="custom-checkbox">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </span>
+              <span class="checklist-text">Our reporting or updates require manual pulling and formatting</span>
+            </label>
+          </li>
+          <li class="checklist-item">
+            <label class="checklist-label">
+              <input type="checkbox" name="checklist" value="7">
+              <span class="custom-checkbox">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </span>
+              <span class="checklist-text">We're growing, and our current processes won't scale</span>
+            </label>
+          </li>
+          <li class="checklist-item">
+            <label class="checklist-label">
+              <input type="checkbox" name="checklist" value="8">
+              <span class="custom-checkbox">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </span>
+              <span class="checklist-text">We don't have a clear picture of where time is actually going</span>
+            </label>
+          </li>
+        </ul>
+        <div class="checklist-result" id="checklist-result">
+          <p id="checklist-result-text">Check the items above to see your automation readiness.</p>
+        </div>
+        <div class="checklist-cta-wrapper">
+          <a href="#form-section" class="hero-cta">Request Your Free Audit</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Audit Offer Section -->
+  <section class="audit-section" id="audit-section">
+    <div class="container">
+      <div class="audit-card animate-on-scroll">
+        <h2>Free Automation Audit</h2>
+        <p>We review your current workflows and identify where automation could reduce friction. You'll leave with a clear picture of what's possible — even if we never work together. No obligation, no sales pitch, no jargon.</p>
+        <ul class="audit-bullets">
+          <li>Current workflow review</li>
+          <li>Bottleneck and waste identification</li>
+          <li>Automation opportunity mapping</li>
+          <li>Plain-language recommendations</li>
+        </ul>
+        <div class="audit-cta-wrapper">
+          <a href="#form-section" class="hero-cta">Request an Automation Audit</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- What Happens Next Section -->
+  <section class="next-section" id="next-section">
+    <div class="container">
+      <h2 class="section-heading animate-on-scroll">What Happens Next</h2>
+      <div class="next-steps stagger-children">
+        <div class="next-step animate-on-scroll">
+          <div class="next-step-number">1</div>
+          <div class="next-step-content">
+            <h3>You submit the form</h3>
+            <p>Tell us your name, company, and the biggest friction point you're dealing with.</p>
+          </div>
+        </div>
+        <div class="next-step animate-on-scroll">
+          <div class="next-step-number">2</div>
+          <div class="next-step-content">
+            <h3>We schedule a short intro call</h3>
+            <p>20–30 minutes. No deck, no pitch. Just a conversation.</p>
+          </div>
+        </div>
+        <div class="next-step animate-on-scroll">
+          <div class="next-step-number">3</div>
+          <div class="next-step-content">
+            <h3>We share clear recommendations</h3>
+            <p>A plain-language summary of what we found and what's possible.</p>
+          </div>
+        </div>
+        <div class="next-step animate-on-scroll">
+          <div class="next-step-number">4</div>
+          <div class="next-step-content">
+            <h3>You decide what to do next</h3>
+            <p>Seriously. There's no pressure and no follow-up unless you want it.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Lead Capture Form Section -->
+  <section class="form-section" id="form-section">
+    <div class="container">
+      <div class="form-container animate-on-scroll">
+        <h2>Start with an Audit</h2>
+        <p class="form-subheading">Tell us a little about your business. We'll take it from there.</p>
+        <form id="lead-form" class="form-fields">
+          <div class="form-group">
+            <label for="full-name">Full Name</label>
+            <input type="text" id="full-name" name="full-name" required placeholder="Your full name">
+          </div>
+          <div class="form-group">
+            <label for="company-name">Company Name</label>
+            <input type="text" id="company-name" name="company-name" required placeholder="Your company name">
+          </div>
+          <div class="form-group">
+            <label for="work-email">Work Email</label>
+            <input type="email" id="work-email" name="work-email" required placeholder="you@company.com">
+          </div>
+          <div class="form-group">
+            <label for="pain-point">Biggest current pain point</label>
+            <textarea id="pain-point" name="pain-point" required placeholder="e.g. Our onboarding process is entirely manual and takes 3 hours per client..."></textarea>
+          </div>
+          <button type="submit" class="form-submit">Request My Free Audit</button>
+          <p class="form-note">No spam. No sales calls. Just a conversation.</p>
+        </form>
+        <div class="form-success" id="form-success">
+          <h3>Thank you.</h3>
+          <p>We'll be in touch within 1–2 business days to schedule your intro call.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Final CTA Section -->
+  <section class="final-cta-section" id="final-cta-section">
+    <div class="container">
+      <h2 class="animate-on-scroll">If any of this resonates, that's enough reason to talk.</h2>
+      <p class="animate-on-scroll">The audit is free. The conversation is low-pressure. The clarity is yours to keep.</p>
+      <a href="#form-section" class="hero-cta animate-on-scroll">Request an Automation Audit</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-logo">Autonova</div>
+    <p class="footer-tagline">Systems thinking for real businesses.</p>
+    <a href="mailto:hello@autonova.com" class="footer-email">hello@autonova.com</a>
+    <p class="footer-copyright">&copy; 2024 Autonova. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // Sticky nav with backdrop blur
+    const nav = document.getElementById('nav');
+
+    function handleNavScroll() {
+      if (window.scrollY > 80) {
+        nav.classList.add('scrolled');
+      } else {
+        nav.classList.remove('scrolled');
+      }
+    }
+
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          handleNavScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }, { passive: true });
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href');
+        if (targetId === '#') return;
+        const target = document.querySelector(targetId);
+        if (target) {
+          const navHeight = nav.offsetHeight;
+          const targetPosition = target.getBoundingClientRect().top + window.scrollY - navHeight - 20;
+          window.scrollTo({
+            top: targetPosition,
+            behavior: 'smooth'
+          });
+        }
+      });
+    });
+
+    // IntersectionObserver for scroll animations
+    const animateElements = document.querySelectorAll('.animate-on-scroll');
+
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px 0px -80px 0px',
+      threshold: 0.15
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    // Check for reduced motion preference
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (prefersReducedMotion) {
+      animateElements.forEach(el => el.classList.add('visible'));
+    } else {
+      animateElements.forEach(el => observer.observe(el));
+    }
+
+    // Interactive Checklist
+    const checkboxes = document.querySelectorAll('.checklist input[type="checkbox"]');
+    const resultText = document.getElementById('checklist-result-text');
+
+    const resultMessages = {
+      '0-2': "You may not need automation yet — but it's worth knowing your options.",
+      '3-5': "There's likely real opportunity here. An audit would give you clarity.",
+      '6-8': "Automation could meaningfully change how your business operates. Let's talk."
+    };
+
+    function updateChecklistResult() {
+      const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+      let message;
+      if (checkedCount <= 2) {
+        message = resultMessages['0-2'];
+      } else if (checkedCount <= 5) {
+        message = resultMessages['3-5'];
+      } else {
+        message = resultMessages['6-8'];
+      }
+
+      // Fade animation for result text
+      resultText.style.opacity = '0';
+      setTimeout(() => {
+        resultText.textContent = message;
+        resultText.style.opacity = '1';
+      }, 200);
+    }
+
+    resultText.style.transition = 'opacity 0.2s ease';
+
+    checkboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', updateChecklistResult);
+    });
+
+    // Animated counter for credibility stats
+    function animateCounter(element, target, suffix = '') {
+      const duration = 1500;
+      const start = 0;
+      const startTime = performance.now();
+
+      function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+
+        // Easing function
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        const current = Math.floor(start + (target - start) * easeOut);
+
+        element.textContent = current + suffix;
+
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        } else {
+          element.textContent = target + suffix;
+        }
+      }
+
+      requestAnimationFrame(update);
+    }
+
+    // Counter observer
+    const counterElements = document.querySelectorAll('.cred-stat[data-count]');
+    const counterObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const el = entry.target;
+          const target = parseInt(el.dataset.count);
+          const suffix = el.dataset.suffix || '';
+          if (!prefersReducedMotion) {
+            animateCounter(el, target, suffix);
+          }
+          counterObserver.unobserve(el);
+        }
+      });
+    }, { threshold: 0.5 });
+
+    counterElements.forEach(el => counterObserver.observe(el));
+
+    // Form submission handler
+    const leadForm = document.getElementById('lead-form');
+    const formSuccess = document.getElementById('form-success');
+    const formFields = leadForm;
+
+    leadForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      // Validate all fields are filled
+      const fullName = document.getElementById('full-name').value.trim();
+      const companyName = document.getElementById('company-name').value.trim();
+      const workEmail = document.getElementById('work-email').value.trim();
+      const painPoint = document.getElementById('pain-point').value.trim();
+
+      if (!fullName || !companyName || !workEmail || !painPoint) {
+        // Shake animation for error
+        leadForm.style.animation = 'shake 0.4s ease';
+        setTimeout(() => {
+          leadForm.style.animation = '';
+        }, 400);
+        return;
+      }
+
+      // Simple email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(workEmail)) {
+        leadForm.style.animation = 'shake 0.4s ease';
+        setTimeout(() => {
+          leadForm.style.animation = '';
+        }, 400);
+        return;
+      }
+
+      // Hide form and show success message
+      formFields.classList.add('hidden');
+      formSuccess.classList.add('visible');
+
+      // Scroll to success message
+      setTimeout(() => {
+        formSuccess.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    });
+
+    // Initialize page on load
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initial nav state check
+      handleNavScroll();
+
+      // Trigger animations for elements already in view
+      setTimeout(() => {
+        animateElements.forEach(el => {
+          const rect = el.getBoundingClientRect();
+          if (rect.top < window.innerHeight && rect.bottom > 0) {
+            el.classList.add('visible');
+          }
+        });
+      }, 100);
+    });
+
+    // Add shake keyframe for form validation
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-10px); }
+        75% { transform: translateX(10px); }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>
